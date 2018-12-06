@@ -63,9 +63,8 @@ fn main() -> std::io::Result<()> {
     let width = bbox.right - bbox.left;
     let height = bbox.bottom - bbox.top;
     let mut areas: Vec<u32> = vec![0; points.len()];
+    let mut sum_distances: Vec<Vec<u32>> = vec![vec![0; width as usize]; height as usize];
     let mut is_infinite: Vec<bool> = vec![false; points.len()];
-    println!("{}, {}", width, height);
-    println!("{:?}", bbox);
 
     for x in bbox.left..bbox.right {
         for y in bbox.top..bbox.bottom {
@@ -73,6 +72,9 @@ fn main() -> std::io::Result<()> {
             let mut distances: Vec<(usize, u32)> = points.iter().enumerate()
                 .map(|(index, pt1)| (index, distance(&pt, pt1)))
                 .collect();
+            let yidx = (y - bbox.top) as usize;
+            let xidx = (x - bbox.left) as usize;
+            sum_distances[yidx][xidx] = distances.iter().map(|(_, dist)| dist).sum();
             distances.sort_by(|(_, dst1), (_, dst2)| dst1.cmp(dst2));
             if distances[0].1 != distances[1].1 {
                 // Not a tie, mark in the map
@@ -86,9 +88,10 @@ fn main() -> std::io::Result<()> {
 
     let non_infinite_areas: Vec<u32> = areas.iter().zip(is_infinite.iter())
         .filter(|(_, infinite)| !(**infinite)).map(|(area, _)| *area).collect();
+    let count_safe = sum_distances.iter().flatten().filter(|sum| **sum < 10000).count();
 
-    println!("{:?}", non_infinite_areas);
-    println!("max: {:?}", non_infinite_areas.iter().max());
+    println!("max area: {}", non_infinite_areas.iter().max().unwrap());
+    println!("safe area size: {}", count_safe);
 
     Ok(())
 }
