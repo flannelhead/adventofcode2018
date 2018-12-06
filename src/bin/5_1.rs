@@ -21,7 +21,6 @@ fn main() -> std::io::Result<()> {
     datafile.read_to_string(&mut data)?;
     data = data.trim().to_string();
 
-
     let range = 'a' as u8 .. 'z' as u8;
     let lengths = range.map(|c| {
         let chr = c as char;
